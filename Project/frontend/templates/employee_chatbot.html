@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Employee AI Assistant</h1>
+<p>Onboarding support for leave policy, timings, dress code, IT support, training, and first-day guidance.</p>
+<form class="form panel" method="post">
+  <textarea name="question" rows="4" placeholder="What should I do on my first day?" required>{{ question }}</textarea>
+  <button type="submit">Ask Employee Assistant</button>
+</form>
+{% if answer %}
+  <section class="panel" style="margin-top:16px">
+    <h2>Answer</h2>
+    <p style="white-space:pre-line">{{ answer }}</p>
+  </section>
+{% endif %}
+{% endblock %}

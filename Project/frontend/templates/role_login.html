@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ portal }} Login | SmartHire AI</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+  <main class="login">
+    <section class="panel">
+      <h1>{{ portal }} Login</h1>
+      <p>Role: {{ role }} | Demo: {{ demo_email }} / {{ demo_password }}</p>
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+          <div class="flash">{{ message }}</div>
+        {% endfor %}
+      {% endwith %}
+      <form class="form" method="post">
+        <input name="email" type="email" placeholder="Email" value="{{ demo_email }}" required>
+        <input name="password" type="password" placeholder="Password" value="{{ demo_password }}" required>
+        <button type="submit">Login</button>
+      </form>
+      {% if employee_accounts %}
+        <div class="account-list">
+          <h2>Sample Employee Accounts</h2>
+          {% for account in employee_accounts %}
+            <button class="account-picker" type="button" data-email="{{ account.email }}" data-password="{{ demo_password }}">
+              <span>{{ account.employee_id }}</span>
+              <strong>{{ account.name }}</strong>
+              <small>{{ account.department }} | {{ account.designation }}</small>
+            </button>
+          {% endfor %}
+        </div>
+        <script>
+          document.querySelectorAll(".account-picker").forEach((button) => {
+            button.addEventListener("click", () => {
+              document.querySelector("input[name='email']").value = button.dataset.email;
+              document.querySelector("input[name='password']").value = button.dataset.password;
+            });
+          });
+        </script>
+      {% endif %}
+      <p><a href="{{ url_for('index') }}">Back to portals</a></p>
+    </section>
+  </main>
+</body>
+</html>

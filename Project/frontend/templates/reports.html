@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="topbar">
+  <h1>Privacy Reports</h1>
+  <form method="post" action="{{ url_for('create_sample_report') }}">
+    <button type="submit" class="button secondary">Load Sample Report</button>
+  </form>
+</div>
+<table>
+  <thead><tr><th>File</th><th>Rows</th><th>PII Types</th><th>Risk</th><th>Created</th><th>Download</th></tr></thead>
+  <tbody>
+  {% for report in reports %}
+    <tr>
+      <td>{{ report.file_name }}</td>
+      <td>{{ report.rows_processed }}</td>
+      <td>{{ report.pii_types }}</td>
+      <td class="risk-{{ report.risk_level }}">{{ report.risk_level }}</td>
+      <td>{{ report.created_at }}</td>
+      <td><a href="{{ url_for('download', filename=report.masked_file) }}">Masked CSV</a></td>
+    </tr>
+  {% else %}
+    <tr>
+      <td colspan="6">
+        No reports yet. Click <strong>Load Sample Report</strong> to create sample HR privacy data.
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

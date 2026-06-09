@@ -1,0 +1,280 @@
+{% extends "base.html" %}
+{% block content %}
+{% if employee %}
+<input class="drawer-toggle" id="profile-drawer-toggle" type="checkbox" aria-hidden="true">
+<input class="drawer-toggle" id="notification-drawer-toggle" type="checkbox" aria-hidden="true">
+{% endif %}
+<div class="topbar employee-topbar">
+  <div>
+    <p class="eyebrow">Employee workspace</p>
+    <h1>Employee Dashboard</h1>
+    {% if employee %}
+      <p>{{ employee.name }} | {{ employee.department }} | {{ employee.role }}</p>
+    {% else %}
+      <p>No employee records are available. Create an employee first.</p>
+    {% endif %}
+  </div>
+  {% if employee %}
+    <div class="employee-top-actions">
+      <label class="bell icon-button" for="notification-drawer-toggle" aria-label="Open notification center">!<span>{{ employee_view.unread_notifications }}</span></label>
+      <a class="button secondary" href="{{ url_for('employee_chat') }}">Ask Assistant</a>
+      <a class="button" href="{{ url_for('checklist', employee_id=employee.id) }}">Open Checklist</a>
+      <label class="profile-launcher" for="profile-drawer-toggle" aria-label="Open employee profile"><span>{{ employee_view.profile.photo_initials }}</span></label>
+    </div>
+  {% endif %}
+</div>
+
+{% if employee %}
+<section class="summary-grid">
+  <div class="card stat accent-card"><span>Assigned Shift</span><strong>{{ employee_view.shift.name }}</strong><small>{{ employee_view.shift.start }} - {{ employee_view.shift.end }}</small></div>
+  <div class="card stat"><span>Attendance</span><strong>{{ employee_view.attendance.percentage }}%</strong><small>{{ employee_view.attendance.today_status }} today</small></div>
+  <div class="card stat"><span>Onboarding Progress</span><strong>{{ employee_view.onboarding_progress }}%</strong><div class="progress"><div class="bar" style="width: {{ employee_view.onboarding_progress }}%"></div></div></div>
+  <div class="card stat"><span>Unread Notifications</span><strong>{{ employee_view.unread_notifications }}</strong><small>HR updates waiting</small></div>
+</section>
+
+<section class="employee-dashboard-shell">
+  <nav class="employee-module-nav" aria-label="Employee modules">
+    <a href="#dashboard"><span>■</span>Dashboard</a>
+    <a href="#attendance"><span>◷</span>Attendance</a>
+    <a href="#shift"><span>◴</span>Shift Details</a>
+    <a href="#learning"><span>◆</span>Personalized Learning Recommendations</a>
+    <a href="#goals"><span>●</span>Employee Goals</a>
+    <a href="#roadmap"><span>◇</span>Employee Roadmap</a>
+    <a href="#documents"><span>▣</span>Employee Document Center</a>
+    <a href="#team"><span>◎</span>Team Introduction</a>
+    <a href="#achievements"><span>★</span>Achievement Bucket</a>
+    <a href="#feedback"><span>✎</span>Feedback & Suggestions</a>
+    <a href="#notifications"><span>!</span>Notifications</a>
+    <a href="{{ url_for('employee_chat') }}"><span>?</span>Employee AI Assistant</a>
+  </nav>
+
+  <div class="employee-main" id="dashboard">
+    <div class="three-column">
+      <div class="card" id="notifications">
+        <div class="section-title"><h2>Notification Center</h2><span class="notification-badge">{{ employee_view.unread_notifications }}</span></div>
+        {% for item in employee_view.notifications %}
+          <p class="member {% if loop.first %}urgent-member{% endif %}">{{ item }}</p>
+        {% endfor %}
+      </div>
+      <div class="card">
+        <div class="section-title"><h2>Company Announcements</h2><span class="notification-badge">{{ employee_view.announcements|length }}</span></div>
+        <div class="alert-list">{% for item in employee_view.announcements %}<p>{{ item }}</p>{% endfor %}</div>
+      </div>
+      <div class="card">
+        <h2>Upcoming Events</h2>
+        {% for event in employee_view.events %}
+          <div class="timeline-item"><span>{{ event.type }}</span><strong>{{ event.name }}</strong><small>{{ event.time }}</small></div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="card" id="shift">
+      <div class="section-title"><h2>Shift Management</h2><span class="pill">{{ employee_view.shift.name }}</span></div>
+      <div class="shift-grid">
+        {% for shift in employee_view.available_shifts %}
+          <div class="shift-card {{ 'active' if shift.name == employee_view.shift.name else '' }}">
+            <span>{{ shift.name }}</span>
+            <strong>{{ shift.start }} - {{ shift.end }}</strong>
+            <small>{{ 'Assigned shift' if shift.name == employee_view.shift.name else 'Available shift' }}</small>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="card" id="attendance">
+      <div class="section-title"><h2>Attendance Module</h2><span class="pill muted-pill">View only | HR managed</span></div>
+      <p class="muted-note">Employees can view attendance records, monthly calendar, percentage, present days, and absent days. Only HR can edit or delete attendance records.</p>
+      <div class="metric-row">
+        <div><span>Present Days</span><strong>{{ employee_view.attendance.present_days }}</strong></div>
+        <div><span>Absent Days</span><strong>{{ employee_view.attendance.absent_days }}</strong></div>
+        <div><span>Late Entries</span><strong>{{ employee_view.attendance.late_entries }}</strong></div>
+        <div><span>Attendance Percentage</span><strong>{{ employee_view.attendance.percentage }}%</strong></div>
+        <div><span>Today</span><strong>{{ employee_view.attendance.today_status }}</strong></div>
+      </div>
+      <h3>Monthly Attendance Calendar</h3>
+      <div class="calendar-grid">
+        {% for day in employee_view.attendance_calendar %}
+          <span class="calendar-day {{ day.status|lower }}">{{ day.day }}</span>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="card" id="learning">
+      <div class="section-title"><h2>Personalized Learning Recommendations</h2><span class="red-badge">New Training Assigned by HR</span></div>
+      <div class="course-grid">
+        {% for course in employee_view.learning %}
+          <div class="course-card"><span>Recommended Course</span><strong>{{ course }}</strong><div class="progress"><div class="bar blue" style="width: 68%"></div></div><small>Training status: In progress</small></div>
+        {% endfor %}
+      </div>
+      <div class="metric-row training-metrics">
+        <div><span>Assigned Courses</span><strong>{{ employee_view.training_tracker.assigned }}</strong></div>
+        <div><span>Completed Courses</span><strong>{{ employee_view.training_tracker.completed }}</strong></div>
+        <div><span>Pending Courses</span><strong>{{ employee_view.training_tracker.pending }}</strong></div>
+        <div><span>Completion Progress</span><strong>{{ employee_view.learning_progress }}%</strong></div>
+      </div>
+    </div>
+
+    <div class="card" id="goals">
+      <h2>Employee Goals</h2>
+      {% for goal in employee_view.goals %}
+        <div class="goal-card">
+          <div><strong>{{ goal.name }}</strong><span>{{ goal.status }} | {{ goal.progress }}% complete</span></div>
+          <div class="progress"><div class="bar blue" style="width: {{ goal.progress }}%"></div></div>
+        </div>
+      {% endfor %}
+    </div>
+
+    <div class="card" id="roadmap">
+      <h2>Employee Roadmap</h2>
+      <div class="roadmap timeline-roadmap">
+        {% for step in employee_view.roadmap %}
+          <div class="roadmap-step {{ 'done' if step.done else '' }}"><span>{{ step.day }}</span><strong>{{ step.title }}</strong></div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="card" id="documents">
+      <div class="section-title"><h2>Employee Document Center</h2><span class="pill">View | Upload | Replace | Download</span></div>
+      <div class="document-action-row">
+        {% for action in employee_view.document_actions %}<button type="button" class="mini-button">{{ action }}</button>{% endfor %}
+      </div>
+      <table class="compact-table">
+        <thead><tr><th>Document</th><th>Verification Status</th><th>Employee Access</th></tr></thead>
+        <tbody>
+          {% for document in employee_view.documents %}
+            <tr><td>{{ document.name }}</td><td><span class="status {{ document.status|lower }}">{{ document.status }}</span></td><td>Available</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card" id="team">
+      <h2>Team Introduction</h2>
+      <div class="team-grid">
+        <div class="team-card manager-card"><span>Reporting Manager</span><strong>{{ employee_view.team.manager }}</strong><small>{{ employee_view.team.contact }}</small></div>
+        <div class="team-card"><span>Department</span><strong>{{ employee_view.team.department }}</strong><small>Department information and contacts</small></div>
+        {% for member in employee_view.team.members %}
+          <div class="team-card"><span>Team Member</span><strong>{{ member }}</strong><small>{{ employee_view.team.department }}</small></div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="split-grid">
+      <div class="card">
+        <h2>Leave Balance Tracker</h2>
+        <div class="course-grid">
+          {% for leave in employee_view.leave_balance %}
+            {% set remaining = leave.total - leave.used %}
+            <div class="course-card"><span>{{ leave.type }}</span><strong>{{ remaining }} remaining</strong><div class="progress"><div class="bar" style="width: {{ remaining / leave.total * 100 }}%"></div></div><small>{{ leave.used }} used of {{ leave.total }}</small></div>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="card">
+        <h2>Productivity Score</h2>
+        {% for label, score in employee_view.productivity.items() %}
+          <div class="progress-row"><span>{{ label|title }} Score</span><div class="progress"><div class="bar" style="width: {{ score }}%"></div></div><strong>{{ score }}%</strong></div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>AI Employee Insights</h2>
+      <div class="metric-row">
+        <div><span>Sentiment Score</span><strong>{{ employee_view.ai.sentiment_score }}%</strong></div>
+        <div><span>Risk Prediction</span><strong>{{ employee_view.ai.risk_prediction }}</strong></div>
+      </div>
+      <p><strong>Smart Recommendation:</strong> {{ employee_view.ai.smart_recommendation }}</p>
+      <p><strong>Weekly Summary:</strong> {{ employee_view.ai.weekly_summary }}</p>
+      {% for insight in employee_view.ai.insights %}<p class="member">{{ insight }}</p>{% endfor %}
+    </div>
+
+    <div class="card" id="feedback">
+      <h2>Feedback & Suggestions</h2>
+      <form class="form wide-form" method="post" action="{{ url_for('employee_feedback') }}">
+        <select name="feedback_type" aria-label="Feedback type">
+          <option>Feedback</option>
+          <option>Suggestion</option>
+          <option>Improvement</option>
+          <option>Issue Report</option>
+        </select>
+        <textarea name="message" rows="4" placeholder="Submit feedback, suggest improvements, or report issues"></textarea>
+        <button type="submit">Submit to HR</button>
+      </form>
+    </div>
+  </div>
+
+  <aside class="employee-right-panel">
+    <div class="card profile-card">
+      <div class="profile-photo">{{ employee_view.profile.photo_initials }}</div>
+      <h2>{{ employee_view.profile.name }}</h2>
+      <p>{{ employee_view.profile.designation }}</p>
+      <div class="detail-list compact-details">
+        <p><span>Employee ID</span><strong>{{ employee_view.profile.employee_id }}</strong></p>
+        <p><span>Date of Birth</span><strong>{{ employee_view.profile.dob }}</strong></p>
+        <p><span>Department</span><strong>{{ employee_view.profile.department }}</strong></p>
+        <p><span>Joining Date</span><strong>{{ employee_view.profile.joining_date }}</strong></p>
+        <p><span>Reporting Manager</span><strong>{{ employee_view.profile.manager }}</strong></p>
+        <p><span>Email Address</span><strong>{{ employee_view.profile.email }}</strong></p>
+        <p><span>Phone Number</span><strong>{{ employee_view.profile.phone }}</strong></p>
+        <p><span>Current Shift</span><strong>{{ employee_view.profile.current_shift }}</strong></p>
+      </div>
+      <div class="badge-list profile-skills">{% for skill in employee_view.profile.skills %}<span class="badge earned">{{ skill }}</span>{% endfor %}</div>
+    </div>
+
+    <div class="card achievement-card" id="achievements">
+      <h2>Achievement Bucket</h2>
+      <div class="achievement-grid">
+        {% for badge in employee_view.badges %}
+          <div class="achievement-badge {{ 'earned' if badge.earned else '' }}"><span>🏆</span><strong>{{ badge.label }}</strong></div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Quick Actions</h2>
+      <div class="quick-actions">
+        <a class="button secondary" href="{{ url_for('checklist', employee_id=employee.id) }}">View Tasks</a>
+        <a class="button secondary" href="{{ url_for('employee_chat') }}">Ask AI Assistant</a>
+        <a class="button secondary" href="#documents">Employee Document Center</a>
+        <a class="button secondary" href="#attendance">View Attendance</a>
+      </div>
+    </div>
+  </aside>
+</section>
+
+<label class="drawer-scrim profile-scrim" for="profile-drawer-toggle"></label>
+<aside class="slide-drawer profile-drawer" aria-label="Employee profile drawer">
+  <label class="drawer-close" for="profile-drawer-toggle">Close</label>
+  <div class="profile-photo">{{ employee_view.profile.photo_initials }}</div>
+  <h2>{{ employee_view.profile.name }}</h2>
+  <p>{{ employee_view.profile.designation }}</p>
+  <div class="detail-list drawer-details">
+    <p><span>Employee ID</span><strong>{{ employee_view.profile.employee_id }}</strong></p>
+    <p><span>Date of Birth</span><strong>{{ employee_view.profile.dob }}</strong></p>
+    <p><span>Department</span><strong>{{ employee_view.profile.department }}</strong></p>
+    <p><span>Designation</span><strong>{{ employee_view.profile.designation }}</strong></p>
+    <p><span>Joining Date</span><strong>{{ employee_view.profile.joining_date }}</strong></p>
+    <p><span>Reporting Manager</span><strong>{{ employee_view.profile.manager }}</strong></p>
+    <p><span>Email</span><strong>{{ employee_view.profile.email }}</strong></p>
+    <p><span>Phone Number</span><strong>{{ employee_view.profile.phone }}</strong></p>
+    <p><span>Shift Information</span><strong>{{ employee_view.profile.current_shift }}</strong></p>
+  </div>
+  <div class="badge-list profile-skills">{% for skill in employee_view.profile.skills %}<span class="badge earned">{{ skill }}</span>{% endfor %}</div>
+</aside>
+
+<label class="drawer-scrim notification-scrim" for="notification-drawer-toggle"></label>
+<aside class="slide-drawer notification-drawer" aria-label="Notification drawer">
+  <label class="drawer-close" for="notification-drawer-toggle">Close</label>
+  <div class="section-title"><h2>Notification Center</h2><span class="notification-badge">{{ employee_view.unread_notifications }}</span></div>
+  {% for item in employee_view.notifications %}
+    <p class="member {% if loop.first %}urgent-member{% endif %}">{{ item }}</p>
+  {% endfor %}
+  <h3>HR Communication</h3>
+  <p class="member">Announcement: HR town hall scheduled for Friday.</p>
+  <p class="member">Training: Security awareness assigned.</p>
+  <p class="member">Meeting Reminder: Team sync tomorrow.</p>
+  <p class="member">Task Assignment: Complete pending onboarding activity.</p>
+  <p class="member">Document Request: Verify pending documents.</p>
+</aside>
+{% endif %}
+{% endblock %}

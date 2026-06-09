@@ -1,0 +1,12 @@
+.env
+__pycache__/
+*.pyc
+database/*.db
+uploads/*
+masked_files/*
+reports/*
+!uploads/.gitkeep
+!masked_files/.gitkeep
+!reports/.gitkeep
+server.out.log
+server.err.log
