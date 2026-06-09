@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>New Employee Registration</h1>
+<p>Creating an employee automatically launches the onboarding agent.</p>
+<form class="form panel" method="post">
+  <label>Name<input name="name" placeholder="Poojitha" required></label>
+  <label>Email<input name="email" type="email" placeholder="poojitha@company.local"></label>
+  <label>Department<input name="department" placeholder="AI & DS" required></label>
+  <label>Role<input name="role" placeholder="Data Analyst" required></label>
+  <button type="submit">Create and Run Agent</button>
+</form>
+{% endblock %}

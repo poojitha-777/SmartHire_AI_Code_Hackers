@@ -1,0 +1,293 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="topbar">
+  <div>
+    <p class="eyebrow">HR command center</p>
+    <h1>HR Dashboard</h1>
+    <p>Onboarding health, privacy risk, approvals, workforce analytics, and AI insights.</p>
+  </div>
+  <a class="button" href="{{ url_for('create_employee') }}">Add Employee</a>
+</div>
+
+<section class="enterprise-section">
+  <div class="section-title"><h2>Executive Summary</h2><span class="pill">Enterprise HRMS overview</span></div>
+  <div class="summary-grid">
+    <div class="card stat accent-card"><span>Total Employees</span><strong>{{ hr_dashboard.executive_summary.total_employees }}</strong></div>
+    <div class="card stat"><span>Active Employees</span><strong>{{ hr_dashboard.executive_summary.active_employees }}</strong></div>
+    <div class="card stat"><span>New Joiners</span><strong>{{ hr_dashboard.executive_summary.new_joiners }}</strong></div>
+    <div class="card stat"><span>Pending Tasks</span><strong>{{ hr_dashboard.executive_summary.pending_tasks }}</strong></div>
+  </div>
+</section>
+
+<section class="dashboard-layout">
+  <div class="dashboard-main">
+    <div class="card">
+      <div class="section-title"><h2>Today's HR Overview</h2><span class="notification-badge">{{ hr_dashboard.overview.pending_approvals }}</span></div>
+      <div class="metric-row">
+        <div><span>Total Meetings</span><strong>{{ hr_dashboard.overview.meetings }}</strong></div>
+        <div><span>Pending Approvals</span><strong>{{ hr_dashboard.overview.pending_approvals }}</strong></div>
+        <div><span>High-Risk Alerts</span><strong>{{ hr_dashboard.overview.high_risk_alerts }}</strong></div>
+        <div><span>New Joiners Today</span><strong>{{ hr_dashboard.overview.new_joiners_today }}</strong></div>
+      </div>
+    </div>
+
+    <div class="card hr-radar-card">
+      <div class="section-title"><h2>Talent Radar</h2><span class="pill">AI workforce pulse</span></div>
+      <div class="radar-grid">
+        {% for item in hr_dashboard.talent_radar %}
+          <div class="radar-tile">
+            <div class="radar-score" style="--score: {{ item.score }}%"><strong>{{ item.score }}%</strong></div>
+            <span>{{ item.label }}</span>
+            <small>{{ item.status }}</small>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title"><h2>Employee Search Center</h2><span class="pill">Interactive table</span></div>
+      <form class="search-grid">
+        <input type="search" placeholder="Search by name" aria-label="Search by name">
+        <input type="search" placeholder="Search by department" aria-label="Search by department">
+        <input type="search" placeholder="Search by employee ID" aria-label="Search by employee ID">
+      </form>
+    </div>
+
+    <div class="card">
+      <div class="section-title"><h2>Smart Alert Center</h2><span class="notification-badge">{{ hr_dashboard.alerts|length }}</span></div>
+      <div class="alert-list">{% for alert in hr_dashboard.alerts %}<p>{{ alert }}</p>{% endfor %}</div>
+    </div>
+
+    <div class="card">
+      <div class="section-title"><h2>PII Risk Dashboard</h2><a href="{{ url_for('reports') }}">View reports</a></div>
+      <div class="risk-grid">
+        <div class="risk-tile high"><span>High Risk Documents</span><strong>{{ stats.high }}</strong></div>
+        <div class="risk-tile medium"><span>Medium Risk Documents</span><strong>{{ stats.medium }}</strong></div>
+        <div class="risk-tile low"><span>Low Risk Documents</span><strong>{{ stats.low }}</strong></div>
+      </div>
+      <div class="chart-bars" aria-label="Risk statistics charts">
+        <div style="height: {{ (stats.high * 18) + 20 }}px"><span>High</span></div>
+        <div class="medium" style="height: {{ (stats.medium * 18) + 20 }}px"><span>Medium</span></div>
+        <div class="low" style="height: {{ (stats.low * 18) + 20 }}px"><span>Low</span></div>
+      </div>
+      <h3>Recent PII Detection Reports</h3>
+      <table class="compact-table">
+        <thead><tr><th>File</th><th>Risk</th><th>PII Types</th></tr></thead>
+        <tbody>
+        {% for report in hr_dashboard.recent_reports %}
+          <tr><td>{{ report.file_name }}</td><td class="risk-{{ report.risk_level }}">{{ report.risk_level }}</td><td>{{ report.pii_types }}</td></tr>
+        {% else %}
+          <tr><td colspan="3">No PII reports yet.</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2>Pending Approvals Module</h2>
+      <div class="approval-list">
+        {% for item in hr_dashboard.approvals %}
+          <div class="approval-item">
+            <div><span class="pill">{{ item.priority }}</span><strong>{{ item.type }}</strong><small>{{ item.count }} pending</small></div>
+            <form class="button-row" method="post" action="{{ url_for('approval_action') }}">
+              <input type="hidden" name="request_type" value="{{ item.type }}">
+              <button type="submit" name="action" value="approved" class="mini-button">Approve</button>
+              <button type="submit" name="action" value="rejected" class="mini-button danger">Reject</button>
+            </form>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title"><h2>HR Communication Center</h2><span class="red-badge">Employee notifications</span></div>
+      <form class="form wide-form communication-form" method="post" action="{{ url_for('hr_communication') }}">
+        <select name="message_type" aria-label="Communication type">
+          <option>Announcement</option>
+          <option>Training Assignment</option>
+          <option>Meeting Reminder</option>
+          <option>Task Assignment</option>
+          <option>Document Request</option>
+        </select>
+        <textarea name="message" rows="3" placeholder="Write the HR message employees should receive"></textarea>
+        <button type="submit">Send Notification</button>
+      </form>
+    </div>
+
+    <div class="split-grid">
+      <div class="card">
+        <h2>Department Analytics</h2>
+        {% for department, count in hr_dashboard.departments.items() %}
+          <div class="progress-row"><span>{{ department }}</span><div class="progress"><div class="bar" style="width: {{ (count / stats.employees * 100) if stats.employees else 0 }}%"></div></div><strong>{{ count }}</strong></div>
+        {% else %}
+          <p>No department data yet.</p>
+        {% endfor %}
+      </div>
+      <div class="card">
+        <h2>Department Onboarding Status</h2>
+        {% for department, status in hr_dashboard.department_status.items() %}
+          <p class="member"><strong>{{ department }}</strong> | Completed {{ status.Completed }} | Pending {{ status.Pending }} | Running {{ status.Running }}</p>
+        {% else %}
+          <p>No onboarding status yet.</p>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title"><h2>Employee Analytics Dashboard</h2><span class="pill">{{ stats.employees }} total</span></div>
+      <div class="analytics-grid">
+        <div><span>Total Employees</span><strong>{{ stats.employees }}</strong></div>
+        <div><span>New Joiners</span><strong>{{ hr_dashboard.analytics.new_joiners }}</strong></div>
+        <div><span>Completed Onboarding</span><strong>{{ stats.completed }}</strong></div>
+        <div><span>Pending Onboarding</span><strong>{{ stats.pending }}</strong></div>
+      </div>
+      <div class="split-grid">
+        <div><h3>Attendance Analytics</h3><div class="progress-row"><span>Overall Attendance</span><div class="progress"><div class="bar blue" style="width: {{ hr_dashboard.analytics.attendance }}%"></div></div><strong>{{ hr_dashboard.analytics.attendance }}%</strong></div></div>
+        <div><h3>Training Completion Analytics</h3><div class="progress-row"><span>Completed Training</span><div class="progress"><div class="bar blue" style="width: {{ hr_dashboard.analytics.training }}%"></div></div><strong>{{ hr_dashboard.analytics.training }}%</strong></div></div>
+      </div>
+    </div>
+
+    <div class="three-column">
+      <div class="card">
+        <h2>Training Management</h2>
+        <div class="metric-row">
+          <div><span>Assigned</span><strong>{{ hr_dashboard.training_management.assigned }}</strong></div>
+          <div><span>Completed</span><strong>{{ hr_dashboard.training_management.completed }}</strong></div>
+          <div><span>Pending</span><strong>{{ hr_dashboard.training_management.pending }}</strong></div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Leave Approval Dashboard</h2>
+        <div class="metric-row">
+          <div><span>Pending</span><strong>{{ hr_dashboard.leave.pending }}</strong></div>
+          <div><span>Approved</span><strong>{{ hr_dashboard.leave.approved }}</strong></div>
+          <div><span>Rejected</span><strong>{{ hr_dashboard.leave.rejected }}</strong></div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Attendance Monitoring</h2>
+        <p>Daily Attendance Summary: {{ hr_dashboard.attendance_monitoring.daily_present }} present, {{ hr_dashboard.attendance_monitoring.daily_absent }} absent.</p>
+        <div class="progress-row"><span>Monthly Report</span><div class="progress"><div class="bar blue" style="width: {{ hr_dashboard.attendance_monitoring.monthly_attendance }}%"></div></div><strong>{{ hr_dashboard.attendance_monitoring.monthly_attendance }}%</strong></div>
+        <h3>Absent Employees</h3>
+        {% for name in hr_dashboard.attendance_monitoring.absent_employees %}<p class="member">{{ name }}</p>{% else %}<p>No absent employees listed.</p>{% endfor %}
+      </div>
+    </div>
+
+    <div class="three-column">
+      <div class="card">
+        <h2>Employee Engagement</h2>
+        <div class="progress-row"><span>Training Participation</span><div class="progress"><div class="bar" style="width: {{ hr_dashboard.engagement.training_participation }}%"></div></div><strong>{{ hr_dashboard.engagement.training_participation }}%</strong></div>
+        <p>Feedback: {{ hr_dashboard.engagement.feedback_positive }}% positive, {{ hr_dashboard.engagement.feedback_neutral }}% neutral, {{ hr_dashboard.engagement.feedback_negative }}% negative.</p>
+      </div>
+      <div class="card">
+        <h2>Employee Lifecycle Tracker</h2>
+        {% for label, value in hr_dashboard.lifecycle.items() %}<p class="member"><strong>{{ label }}</strong> {{ value }}</p>{% endfor %}
+      </div>
+      <div class="card">
+        <h2>Compliance Monitoring</h2>
+        <div class="metric-row">
+          <div><span>Missing Docs</span><strong>{{ hr_dashboard.compliance.missing_documents }}</strong></div>
+          <div><span>Pending Checks</span><strong>{{ hr_dashboard.compliance.pending_verifications }}</strong></div>
+          <div><span>Expiring Docs</span><strong>{{ hr_dashboard.compliance.expiring_documents }}</strong></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="three-column">
+      <div class="card">
+        <h2>Interview Scheduling</h2>
+        {% for interview in hr_dashboard.interviews %}<div class="timeline-item"><span>{{ interview.status }}</span><strong>{{ interview.candidate }}</strong><small>{{ interview.role }} | {{ interview.time }}</small></div>{% endfor %}
+      </div>
+      <div class="card">
+        <h2>Resource Allocation</h2>
+        <div class="metric-row">
+          <div><span>Laptop Allocation</span><strong>{{ hr_dashboard.resources.laptops }}</strong></div>
+          <div><span>Software Licenses</span><strong>{{ hr_dashboard.resources.licenses }}</strong></div>
+          <div><span>Assets Tracked</span><strong>{{ hr_dashboard.resources.assets_tracked }}</strong></div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Performance Snapshot</h2>
+        <div class="progress-row"><span>Employee Progress</span><div class="progress"><div class="bar" style="width: {{ (stats.completed / stats.employees * 100) if stats.employees else 0 }}%"></div></div><strong>{{ stats.completed }}/{{ stats.employees }}</strong></div>
+        <div class="progress-row"><span>Training Progress</span><div class="progress"><div class="bar blue" style="width: {{ hr_dashboard.analytics.training }}%"></div></div><strong>{{ hr_dashboard.analytics.training }}%</strong></div>
+        <p>Completion Statistics: {{ stats.completed }} completed, {{ stats.pending }} pending.</p>
+      </div>
+    </div>
+
+    <div class="split-grid">
+      <div class="card">
+        <h2>AI Insights Panel</h2>
+        <div class="metric-row">
+          <div><span>Sentiment</span><strong>{{ hr_dashboard.ai.employee_sentiment }}%</strong></div>
+          <div><span>Risk Prediction</span><strong>{{ hr_dashboard.ai.risk_prediction }}</strong></div>
+        </div>
+        <h3>AI Smart Recommendations</h3>
+        {% for item in hr_dashboard.ai.smart_recommendations %}<p class="member">{{ item }}</p>{% endfor %}
+        <p><strong>AI Weekly Summary:</strong> {{ hr_dashboard.ai.weekly_summary }}</p>
+        {% for item in hr_dashboard.ai.insights %}<p class="member">{{ item }}</p>{% endfor %}
+      </div>
+      <div class="card">
+        <h2>HR Efficiency Score</h2>
+        <div class="metric-row">
+          <div><span>Pending Tasks</span><strong>{{ hr_dashboard.efficiency.pending_tasks }}</strong></div>
+          <div><span>Completed Tasks</span><strong>{{ hr_dashboard.efficiency.completed_tasks }}</strong></div>
+          <div><span>Response Time</span><strong>{{ hr_dashboard.efficiency.response_time }}</strong></div>
+          <div><span>Overall Rating</span><strong>{{ hr_dashboard.efficiency.rating }}%</strong></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Employees</h2>
+      <table>
+        <thead><tr><th>Name</th><th>Employee ID</th><th>Role</th><th>Department</th><th>Account</th><th>Laptop</th><th>License</th><th>Email</th><th>Progress</th></tr></thead>
+        <tbody>
+        {% for employee in employees %}
+          <tr>
+            <td><a href="{{ url_for('agent_status', employee_id=employee.id) }}">{{ employee.name }}</a></td>
+            <td>EMP-{{ "%04d"|format(employee.id) }}</td>
+            <td>{{ employee.role }}</td>
+            <td>{{ employee.department }}</td>
+            <td>{{ "Yes" if employee.account_created else "No" }}</td>
+            <td>{{ "Yes" if employee.laptop_requested else "No" }}</td>
+            <td>{{ "Yes" if employee.license_assigned else "No" }}</td>
+            <td>{{ "Yes" if employee.welcome_email_sent else "No" }}</td>
+            <td>{{ employee.progress_percentage or 0 }}%</td>
+          </tr>
+        {% else %}
+          <tr><td colspan="9">No employees yet.</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <aside class="dashboard-side">
+    <div class="card">
+      <h2>HR Notification Center</h2>
+      <p class="member">New Joiners: {{ hr_dashboard.executive_summary.new_joiners }}</p>
+      <p class="member">Pending Approvals: {{ hr_dashboard.overview.pending_approvals }}</p>
+      <p class="member">Risk Alerts: {{ hr_dashboard.overview.high_risk_alerts }}</p>
+      <p class="member">Training Deadlines: {{ hr_dashboard.training_management.pending }}</p>
+    </div>
+    <div class="card">
+      <h2>AI Task Prioritization</h2>
+      {% for group, tasks in hr_dashboard.priorities.items() %}
+        <h3>{{ group }}</h3>
+        {% for task in tasks %}<p>{{ task }}</p>{% endfor %}
+      {% endfor %}
+    </div>
+    <div class="card">
+      <h2>HR Activity Log</h2>
+      {% for item in hr_dashboard.activity_log %}<p class="member">{{ item }}</p>{% endfor %}
+    </div>
+    <div class="card">
+      <h2>AI HR Command Center</h2>
+      {% for item in hr_panel.schedule %}<p><strong>{{ item.time }}</strong> | {{ item.task }}</p>{% endfor %}
+      <p><strong>{{ hr_panel.ai_loop.loop_name }}</strong></p>
+      <p>{{ hr_panel.ai_loop.reflection.summary }}</p>
+      <p><span class="pill">{{ hr_panel.ai_loop.reflection.confidence }}</span> confidence</p>
+    </div>
+  </aside>
+</section>
+{% endblock %}

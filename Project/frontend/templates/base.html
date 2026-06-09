@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SmartHire AI</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="brand">SmartHire AI</div>
+      <nav class="nav">
+        {% if session.get("role") == "HR" %}
+          <a class="active" href="{{ url_for('dashboard') }}"><span>▦</span>HR Dashboard</a>
+          <a href="{{ url_for('create_employee') }}"><span>＋</span>New Employee</a>
+          <a href="{{ url_for('upload') }}"><span>◆</span>PII Detector</a>
+          <a href="{{ url_for('reports') }}"><span>▤</span>Reports</a>
+          <a href="{{ url_for('hr_chat') }}"><span>?</span>HR AI Assistant</a>
+        {% elif session.get("role") == "employee" %}
+          <a class="active" href="{{ url_for('employee_dashboard') }}#dashboard"><span>▦</span>Dashboard</a>
+          <a href="{{ url_for('employee_dashboard') }}#attendance"><span>◷</span>Attendance</a>
+          <a href="{{ url_for('employee_dashboard') }}#shift"><span>◴</span>Shift Details</a>
+          <a href="{{ url_for('employee_dashboard') }}#learning"><span>◆</span>Learning Recommendations</a>
+          <a href="{{ url_for('employee_dashboard') }}#goals"><span>●</span>Employee Goals</a>
+          <a href="{{ url_for('employee_dashboard') }}#roadmap"><span>◇</span>Employee Roadmap</a>
+          <a href="{{ url_for('employee_dashboard') }}#documents"><span>▣</span>Document Center</a>
+          <a href="{{ url_for('employee_dashboard') }}#team"><span>◎</span>Team Introduction</a>
+          <a href="{{ url_for('employee_dashboard') }}#achievements"><span>★</span>Achievement Bucket</a>
+          <a href="{{ url_for('employee_dashboard') }}#feedback"><span>✎</span>Feedback & Suggestions</a>
+          <a href="{{ url_for('employee_dashboard') }}#notifications"><span>!</span>Notifications</a>
+          <a href="{{ url_for('employee_chat') }}"><span>?</span>Employee AI Assistant</a>
+        {% endif %}
+        {% if session.get("role") %}
+          <a href="{{ url_for('logout') }}"><span>↗</span>Logout</a>
+        {% endif %}
+      </nav>
+    </aside>
+    <main class="main">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+          <div class="flash">{{ message }}</div>
+        {% endfor %}
+      {% endwith %}
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+</body>
+</html>

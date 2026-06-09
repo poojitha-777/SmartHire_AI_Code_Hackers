@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>PII Detector & Masker</h1>
+<p>Upload CSV or JSON files. The system detects sensitive fields, masks values, and generates a risk report.</p>
+<div class="button-row">
+  <form method="post" action="{{ url_for('create_sample_report') }}">
+    <button type="submit" class="button secondary">Load Sample Report</button>
+  </form>
+</div>
+<form class="form panel" method="post" enctype="multipart/form-data">
+  <input type="file" name="file" accept=".csv,.json" required>
+  <button type="submit">Scan and Mask</button>
+</form>
+{% endblock %}

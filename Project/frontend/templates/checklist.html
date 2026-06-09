@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Onboarding Checklist</h1>
+<p>{{ employee.name }} · {{ progress }}% complete</p>
+<div class="progress"><div class="bar" style="width: {{ progress }}%"></div></div>
+<form class="panel" method="post" style="margin-top:16px">
+  {% for task in tasks %}
+    <label style="display:block;margin:10px 0">
+      <input style="width:auto" type="checkbox" name="task" value="{{ task.id }}" {% if task.completed %}checked{% endif %}>
+      {{ task.task }}
+    </label>
+  {% endfor %}
+  <button type="submit">Update Checklist</button>
+</form>
+{% endblock %}

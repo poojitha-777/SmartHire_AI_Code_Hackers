@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Login | SmartHire AI</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+  <main class="landing">
+    <section class="landing-panel">
+      <div class="landing-kicker">SmartHire AI System</div>
+      <h1>Secure Employee Onboarding Concierge</h1>
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+          <div class="flash">{{ message }}</div>
+        {% endfor %}
+      {% endwith %}
+      <div class="login-options">
+        <a class="login-card" href="{{ url_for('hr_login') }}">
+          <span class="login-icon">HR</span>
+          <strong>Login as HR</strong>
+        </a>
+        <a class="login-card employee-card" href="{{ url_for('employee_login') }}">
+          <span class="login-icon">EMP</span>
+          <strong>Login as Employee</strong>
+        </a>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

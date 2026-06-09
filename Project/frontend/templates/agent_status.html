@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="topbar">
+  <div>
+    <h1>Agent Workflow Status</h1>
+    <p>{{ employee.name }} · {{ employee.department }} · {{ employee.role }}</p>
+  </div>
+  <form method="post" action="{{ url_for('agent_run') }}">
+    <input type="hidden" name="employee_id" value="{{ employee.id }}">
+    <button type="submit">Run Again</button>
+  </form>
+</div>
+
+<section class="panel">
+  <h2>{{ workflow.overall_status }}</h2>
+  <div class="progress"><div class="bar" style="width: {{ workflow.progress_percentage }}%"></div></div>
+  <p>{{ workflow.progress_percentage }}% complete</p>
+</section>
+
+<section class="grid" style="margin-top:16px">
+  <div class="card"><h3>Completed Tasks</h3><p>{{ logs|length }} logged steps</p></div>
+  <div class="card"><h3>Training</h3><p>{{ training|join(", ") }}</p></div>
+  <div class="card"><h3>Checklist</h3><p><a href="{{ url_for('checklist', employee_id=employee.id) }}">Open checklist</a></p></div>
+</section>
+
+<h2 style="margin-top:24px">Execution Logs</h2>
+<table>
+  <thead><tr><th>Time</th><th>Message</th></tr></thead>
+  <tbody>
+  {% for log in logs %}
+    <tr><td>{{ log.created_at }}</td><td>{{ log.message }}</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

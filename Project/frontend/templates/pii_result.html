@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>PII Detection Results</h1>
+<section class="panel">
+  <p><strong>File Name:</strong> {{ report.file_name }}</p>
+  <p><strong>Rows Processed:</strong> {{ report.rows_processed }}</p>
+  <p><strong>Detected:</strong> {{ report.pii_types }}</p>
+  <p><strong>Risk Level:</strong> <span class="risk-{{ report.risk_level }}">{{ report.risk_level }}</span></p>
+  <p><strong>Timestamp:</strong> {{ report.created_at }}</p>
+  <a class="button" href="{{ url_for('download', filename=report.masked_file) }}">Download Masked File</a>
+</section>
+{% endblock %}

@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>AI Chatbot</h1>
+<p>This app now has independent Employee and HR assistants.</p>
+<form class="form panel" method="post">
+  <textarea name="question" rows="4" placeholder="What is leave policy?" required>{{ question }}</textarea>
+  <button type="submit">Ask</button>
+</form>
+{% if answer %}
+  <section class="panel" style="margin-top:16px">
+    <h2>Answer</h2>
+    <p>{{ answer }}</p>
+  </section>
+{% endif %}
+{% endblock %}

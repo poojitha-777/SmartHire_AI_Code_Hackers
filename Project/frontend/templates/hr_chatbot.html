@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>HR AI Assistant</h1>
+<p>Management assistant for onboarding status, documents, schedules, alerts, and HR task prioritization.</p>
+<section class="grid">
+  <form class="form panel" method="post">
+    <textarea name="question" rows="4" placeholder="Generate today's HR schedule" required>{{ question }}</textarea>
+    <button type="submit">Ask HR Assistant</button>
+  </form>
+  <div class="card">
+    <h3>Try</h3>
+    <p>Generate today's HR schedule</p>
+    <p>Show live HR alerts</p>
+    <p>Prioritize critical HR tasks</p>
+    <p>Run HR AI loop</p>
+    <p>Show employee onboarding status</p>
+    <p>Show document verification status</p>
+  </div>
+</section>
+{% if answer %}
+  <section class="panel" style="margin-top:16px">
+    <h2>Answer</h2>
+    <p style="white-space:pre-line">{{ answer }}</p>
+  </section>
+{% endif %}
+{% endblock %}

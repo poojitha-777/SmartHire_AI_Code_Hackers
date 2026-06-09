@@ -1,0 +1,34 @@
+[
+  {
+    "question": "What is leave policy?",
+    "answer": "Employees receive paid annual leave, sick leave, and public holidays as per HR policy."
+  },
+  {
+    "question": "How do I apply leave?",
+    "answer": "Apply leave in the HR portal and notify your reporting manager before the planned dates."
+  },
+  {
+    "question": "What are office timings?",
+    "answer": "Standard office timings are 9:30 AM to 6:30 PM, Monday to Friday."
+  },
+  {
+    "question": "What is the dress code?",
+    "answer": "Smart casuals are accepted unless your team has a specific client-facing requirement."
+  },
+  {
+    "question": "Who should I contact for IT support?",
+    "answer": "Contact the IT helpdesk or raise a support ticket from the employee portal."
+  },
+  {
+    "question": "What training should I complete?",
+    "answer": "Complete security awareness, role onboarding, and department-specific training."
+  },
+  {
+    "question": "What should I do on my first day?",
+    "answer": "Meet your reporting manager, set up company email, complete security training, and review your onboarding checklist."
+  },
+  {
+    "question": "Who is my team lead?",
+    "answer": "Your team lead or reporting manager will be assigned by HR during onboarding. Check your onboarding checklist or contact HR if it is not visible yet."
+  }
+]
